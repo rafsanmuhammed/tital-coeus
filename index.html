@@ -361,7 +361,7 @@ footer { border-top: 1px solid rgba(0,0,0,0.1); padding: 48px 64px 36px; margin-
     <div style="display:flex; flex-direction:column; gap:14px; text-align:left;">
       <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"/></div>
       <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"/></div>
-      <button class="submit-btn" id="loginBtn" style="margin-top:8px;">Sign in</button>
+      <button class="submit-btn" onclick="handleLogin()" style="margin-top:8px;">Sign in</button>
       <p id="loginError" style="color:#ff3b30; font-size:13px; text-align:center; display:none;"></p>
     </div>
   </div>
@@ -658,7 +658,7 @@ async function openPost(id) {
 window.goBack = () => showPage(lastViewedPage);
 
 // ── ADMIN PANEL ──
-async function loadAdminPanel() {
+async function loadAdminPanel() { window._loadAdminPanel = loadAdminPanel;
   if (!currentUser || currentUser.email !== ADMIN_EMAIL) { showPage('login'); return; }
   const posts = await fetchPosts(false);
   const container = document.getElementById('adminPostsList');
@@ -797,6 +797,45 @@ document.getElementById("logoutBtn").addEventListener("click", doLogout);
 document.getElementById("loginBtn").addEventListener("click", doLogin);
 document.getElementById('loginPassword').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') doLogin();
+});
+</script>
+
+<script>
+function handleLogin() {
+  var email = document.getElementById('loginEmail').value;
+  var pass = document.getElementById('loginPassword').value;
+  var err = document.getElementById('loginError');
+  var btn = event.target;
+  err.style.display = 'none';
+  btn.textContent = 'Signing in...';
+  btn.disabled = true;
+
+  import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js').then(function(authModule) {
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js').then(function(appModule) {
+      var app;
+      try { app = appModule.getApp(); } catch(e) { app = appModule.initializeApp(FIREBASE_CONFIG); }
+      var auth = authModule.getAuth(app);
+      authModule.signInWithEmailAndPassword(auth, email, pass).then(function(result) {
+        btn.textContent = 'Sign in';
+        btn.disabled = false;
+        document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+        document.getElementById('admin').classList.add('active');
+        window.scrollTo({top: 0});
+        if (window._loadAdminPanel) window._loadAdminPanel();
+      }).catch(function(e) {
+        btn.textContent = 'Sign in';
+        btn.disabled = false;
+        err.textContent = 'Wrong email or password.';
+        err.style.display = 'block';
+      });
+    });
+  });
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('login').classList.contains('active')) {
+    handleLogin();
+  }
 });
 </script>
 </body>
