@@ -1,10 +1,4 @@
-// ════════════════════════════════════════════════
-// PASTE YOUR FIREBASE CONFIG HERE
-// Get it from: Firebase Console → Project Settings → Your Apps → SDK setup
-// ════════════════════════════════════════════════
-
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
+const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDWHiJAz49w1JGEaSNS40nAwoXftMm-5H8",
   authDomain: "titan-coeus.firebaseapp.com",
   projectId: "titan-coeus",
@@ -14,8 +8,4 @@ const firebaseConfig = {
   measurementId: "G-9P33VZ03TZ"
 };
 
-// ════════════════════════════════════════════════
-// YOUR ADMIN EMAIL — the only account that can write blogs
-// Must match the email you use in Firebase Authentication
-// ════════════════════════════════════════════════
 const ADMIN_EMAIL = "rafsaanmuhammed@email.com";
