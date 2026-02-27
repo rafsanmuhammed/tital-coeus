@@ -1,0 +1,10 @@
+{
+  "name": "titan-coeus",
+  "version": "1.0.0",
+  "description": "Titan Coeus - A blog by a thinker",
+  "scripts": {
+    "dev": "serve public",
+    "build": "echo 'Static site, no build needed'"
+  },
+  "dependencies": {}
+}
