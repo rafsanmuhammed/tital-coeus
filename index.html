@@ -451,10 +451,12 @@ const doLogin = async () => {
   const err = document.getElementById('loginError');
   err.style.display = 'none';
   try {
-    await signInWithEmailAndPassword(auth, email, pass);
-    showPage('admin');
+    const result = await signInWithEmailAndPassword(auth, email, pass);
+    currentUser = result.user;
+    showPageRaw('admin');
+    loadAdminPanel();
   } catch(e) {
-    err.textContent = 'Invalid email or password.';
+    err.textContent = 'Wrong email or password.';
     err.style.display = 'block';
   }
 };
