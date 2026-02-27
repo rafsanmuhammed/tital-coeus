@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Titan Coeus</title>
+<meta name="description" content="Exploring ideas at the intersection of technology, philosophy, and the future."/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f5f7; --fg: #1d1d1f; --mid: #6e6e73;
+  --white: #fff; --blue: #0066cc;
+  --serif: 'Georgia', 'Times New Roman', serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--fg); overflow-x: hidden; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 52px;
+  background: rgba(245,245,247,0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.nav-brand { font-size: 17px; font-weight: 600; color: var(--fg); text-decoration: none; cursor: pointer; }
+.nav-links { display: flex; gap: 32px; align-items: center; }
+.nav-links a { font-size: 14px; color: var(--fg); text-decoration: none; opacity: 0.8; transition: opacity 0.2s; cursor: pointer; }
+.nav-links a:hover { opacity: 1; }
+.nav-admin { font-size: 12px !important; opacity: 0.4 !important; }
+
+/* PAGES */
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+
+/* ─── HOME ─── */
+.hero {
+  padding-top: 140px; padding-bottom: 80px; text-align: center;
+  opacity: 0; transform: translateY(24px);
+  animation: fadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+}
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(52px, 8vw, 96px);
+  font-weight: 700; letter-spacing: -2.5px; line-height: 1.04;
+  margin-bottom: 20px;
+}
+.hero p { font-size: 17px; color: var(--mid); max-width: 400px; margin: 0 auto; line-height: 1.6; }
+
+/* FEATURED */
+.featured {
+  width: 100%; height: 74vh; min-height: 500px;
+  position: relative; overflow: hidden; cursor: pointer;
+  opacity: 0; animation: fadeUp 1s cubic-bezier(0.22,1,0.36,1) 0.3s forwards;
+}
+.featured-bg {
+  position: absolute; inset: 0;
+  background: #0a0a0a;
+  transition: transform 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+.featured-img {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  opacity: 0.38; transition: opacity 0.5s, transform 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+.featured:hover .featured-img { opacity: 0.48; transform: scale(1.02); }
+.featured-content {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  justify-content: flex-end; padding: 56px 64px;
+}
+.featured-label { font-size: 11px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 14px; }
+.featured-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5.5vw, 72px); font-weight: 700;
+  color: #fff; letter-spacing: -1.5px; line-height: 1.06;
+  max-width: 700px; margin-bottom: 14px;
+}
+.featured-desc { font-size: 16px; color: rgba(255,255,255,0.58); max-width: 460px; line-height: 1.6; margin-bottom: 32px; }
+.featured-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 500; color: #fff;
+  border: 1px solid rgba(255,255,255,0.28); padding: 10px 22px;
+  border-radius: 980px; text-decoration: none; width: fit-content;
+  transition: background 0.25s, border-color 0.25s;
+}
+.featured-cta:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+.featured-cta span { transition: transform 0.2s; display: inline-block; }
+.featured-cta:hover span { transform: translateX(3px); }
+
+/* CAROUSEL SECTION */
+.carousel-section {
+  padding: 80px 0 40px;
+  opacity: 0; animation: fadeUp 1s cubic-bezier(0.22,1,0.36,1) 0.5s forwards;
+}
+.section-eyebrow { text-align: center; font-size: 11px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; color: var(--mid); margin-bottom: 10px; }
+.section-heading { text-align: center; font-family: var(--serif); font-size: clamp(28px, 4vw, 46px); font-weight: 700; letter-spacing: -1px; margin-bottom: 48px; }
+
+.carousel-wrap { position: relative; overflow: hidden; padding: 20px 0 36px; }
+.carousel-track { display: flex; align-items: center; gap: 24px; transition: transform 0.52s cubic-bezier(0.22,1,0.36,1); will-change: transform; }
+.c-card {
+  flex-shrink: 0; width: 340px; border-radius: 16px; overflow: hidden;
+  cursor: pointer; position: relative;
+  transition: transform 0.5s cubic-bezier(0.22,1,0.36,1), filter 0.5s cubic-bezier(0.22,1,0.36,1), box-shadow 0.5s;
+  filter: blur(3px) brightness(0.65); transform: scale(0.84);
+  background: var(--white); text-decoration: none; color: inherit; display: block;
+}
+.c-card.active { filter: none; transform: scale(1); box-shadow: 0 28px 72px rgba(0,0,0,0.16); z-index: 2; }
+.c-card.near { filter: blur(1.5px) brightness(0.8); transform: scale(0.92); }
+.c-img { width: 100%; height: 218px; background-size: cover; background-position: center; }
+.c-body { padding: 20px 22px 24px; }
+.c-tag { font-size: 10px; font-weight: 600; letter-spacing: 1.8px; text-transform: uppercase; color: var(--mid); margin-bottom: 8px; }
+.c-title { font-family: var(--serif); font-size: 19px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.3; margin-bottom: 8px; }
+.c-desc { font-size: 13px; color: var(--mid); line-height: 1.55; }
+
+.carousel-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--white); border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 10; transition: box-shadow 0.2s, transform 0.2s;
+}
+.carousel-btn:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.15); transform: translateY(-50%) scale(1.06); }
+.btn-prev { left: 24px; } .btn-next { right: 24px; }
+.carousel-dots { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+.dot { width: 6px; height: 6px; border-radius: 3px; background: #c4c4c6; cursor: pointer; transition: width 0.3s, background 0.3s; }
+.dot.active { width: 20px; background: var(--fg); }
+
+/* LATEST GRID */
+.latest-section {
+  padding: 80px 64px; max-width: 1200px; margin: 0 auto;
+  opacity: 0; animation: fadeUp 1s cubic-bezier(0.22,1,0.36,1) 0.65s forwards;
+}
+.posts-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1px; background: rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; overflow: hidden;
+}
+.post-tile {
+  background: var(--white); padding: 28px;
+  display: flex; flex-direction: column; gap: 10px;
+  cursor: pointer; transition: background 0.2s;
+}
+.post-tile:hover { background: #fafafa; }
+.tile-meta { display: flex; gap: 12px; align-items: center; }
+.tile-tag { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mid); }
+.tile-date { font-size: 11px; color: #aaa; }
+.tile-title { font-family: var(--serif); font-size: 18px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.3; }
+.tile-desc { font-size: 13px; color: var(--mid); line-height: 1.6; }
+.tile-read { font-size: 12px; font-weight: 500; color: var(--blue); margin-top: 4px; }
+
+.view-all-wrap { text-align: center; margin-top: 44px; }
+.view-all { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; color: var(--blue); text-decoration: none; cursor: pointer; transition: gap 0.2s; }
+.view-all:hover { gap: 10px; }
+
+/* ─── BLOGS PAGE ─── */
+.blogs-hero { padding: 120px 64px 40px; max-width: 1200px; margin: 0 auto; }
+.blogs-hero h1 { font-family: var(--serif); font-size: clamp(36px, 5vw, 60px); font-weight: 700; letter-spacing: -1.5px; margin-bottom: 10px; }
+.blogs-hero p { font-size: 17px; color: var(--mid); }
+.blogs-list { max-width: 1200px; margin: 0 auto; padding: 0 64px 40px; }
+.blog-row {
+  display: grid; grid-template-columns: 52px 1fr auto;
+  align-items: start; gap: 24px; padding: 28px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  cursor: pointer; transition: background 0.15s;
+}
+.blog-row:first-child { border-top: 1px solid rgba(0,0,0,0.07); }
+.blog-num { font-size: 13px; color: #bbb; font-weight: 400; padding-top: 3px; }
+.blog-row-title { font-family: var(--serif); font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 7px; transition: color 0.2s; }
+.blog-row:hover .blog-row-title { color: var(--blue); }
+.blog-row-desc { font-size: 14px; color: var(--mid); line-height: 1.6; }
+.blog-row-tag { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mid); white-space: nowrap; padding-top: 4px; }
+.pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 40px 0 20px; }
+.pg-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; background: none; color: var(--fg); font-family: var(--sans); }
+.pg-btn.active { background: var(--fg); color: #fff; }
+.pg-btn:hover:not(.active) { border-color: rgba(0,0,0,0.15); }
+.pg-next { width: auto; padding: 0 16px; border-radius: 980px; }
+
+/* ─── SINGLE POST ─── */
+.post-page { max-width: 720px; margin: 0 auto; padding: 120px 32px 80px; }
+.post-back { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--mid); cursor: pointer; margin-bottom: 40px; transition: color 0.2s; }
+.post-back:hover { color: var(--fg); }
+.post-header-tag { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--mid); margin-bottom: 16px; }
+.post-header-title { font-family: var(--serif); font-size: clamp(32px, 5vw, 52px); font-weight: 700; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 16px; }
+.post-header-meta { font-size: 13px; color: var(--mid); margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid rgba(0,0,0,0.1); }
+.post-body { font-size: 18px; line-height: 1.75; color: #1d1d1f; }
+.post-body p { margin-bottom: 24px; }
+.post-body h2 { font-family: var(--serif); font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin: 40px 0 16px; }
+.post-body h3 { font-family: var(--serif); font-size: 22px; font-weight: 700; margin: 32px 0 12px; }
+.post-body blockquote { border-left: 3px solid var(--fg); padding-left: 24px; margin: 32px 0; font-style: italic; color: var(--mid); }
+.post-body img { width: 100%; border-radius: 12px; margin: 32px 0; }
+
+/* ─── CONTACT ─── */
+.contact-section { max-width: 600px; margin: 0 auto; padding: 120px 48px 80px; text-align: center; }
+.contact-section h1 { font-family: var(--serif); font-size: clamp(32px, 5vw, 56px); font-weight: 700; letter-spacing: -1.5px; margin-bottom: 14px; }
+.contact-section > p { font-size: 17px; color: var(--mid); margin-bottom: 48px; line-height: 1.6; }
+.contact-form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
+.form-group label { font-size: 13px; font-weight: 500; display: block; margin-bottom: 6px; }
+.form-group input, .form-group textarea {
+  width: 100%; padding: 12px 16px;
+  border: 1px solid rgba(0,0,0,0.15); border-radius: 10px;
+  font-family: var(--sans); font-size: 15px; background: var(--white);
+  color: var(--fg); outline: none; transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group textarea:focus { border-color: var(--blue); }
+.form-group textarea { min-height: 140px; resize: vertical; }
+.submit-btn { background: var(--fg); color: #fff; padding: 14px 32px; border-radius: 980px; border: none; font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; align-self: center; font-family: var(--sans); }
+.submit-btn:hover { opacity: 0.82; }
+
+/* ─── FOOTER ─── */
+footer { border-top: 1px solid rgba(0,0,0,0.1); padding: 48px 64px 36px; margin-top: 80px; }
+.footer-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 32px; }
+.footer-brand { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+.footer-tagline { font-size: 13px; color: var(--mid); max-width: 240px; line-height: 1.5; }
+.footer-links { display: flex; gap: 48px; }
+.footer-col h4 { font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+.footer-col a { display: block; font-size: 13px; color: var(--mid); text-decoration: none; margin-bottom: 8px; cursor: pointer; transition: color 0.2s; }
+.footer-col a:hover { color: var(--fg); }
+.footer-bottom { max-width: 1200px; margin: 28px auto 0; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; font-size: 12px; color: #aaa; }
+
+/* ─── LOADING ─── */
+.loading { display: flex; justify-content: center; padding: 60px; }
+.spinner { width: 28px; height: 28px; border: 2px solid rgba(0,0,0,0.1); border-top-color: var(--fg); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+.empty-state { text-align: center; padding: 80px 32px; color: var(--mid); font-size: 16px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand" onclick="showPage('home')">Titan Coeus</span>
+  <div class="nav-links">
+    <a onclick="showPage('home')">Home</a>
+    <a onclick="showPage('blogs')">Blogs</a>
+    <a onclick="showPage('contact')">Contact</a>
+    <a class="nav-admin" onclick="showPage('login')" id="adminNavLink">Admin</a>
+  </div>
+</nav>
+
+<!-- ══ HOME ══ -->
+<div id="home" class="page active">
+  <section class="hero">
+    <h1>Clarity in thought.</h1>
+    <p>Exploring ideas at the intersection of technology, philosophy, and the future.</p>
+  </section>
+
+  <section class="featured" id="featuredPost" style="display:none" onclick="openFeatured()">
+    <div class="featured-bg"></div>
+    <div class="featured-img" id="featuredImg"></div>
+    <div class="featured-content">
+      <div class="featured-label">Latest Essay</div>
+      <h2 class="featured-title" id="featuredTitle"></h2>
+      <p class="featured-desc" id="featuredDesc"></p>
+      <div class="featured-cta">Read the essay <span>→</span></div>
+    </div>
+  </section>
+  <div id="featuredLoading" class="loading"><div class="spinner"></div></div>
+
+  <section class="carousel-section" id="carouselSection" style="display:none">
+    <div class="section-eyebrow">The Archive</div>
+    <h2 class="section-heading">Recent Writings</h2>
+    <div class="carousel-wrap" id="carouselWrap">
+      <button class="carousel-btn btn-prev" onclick="moveCarousel(-1)">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 4l-5 5 5 5" stroke="#1d1d1f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="carousel-track" id="carouselTrack"></div>
+      <button class="carousel-btn btn-next" onclick="moveCarousel(1)">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 4l5 5-5 5" stroke="#1d1d1f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="carousel-dots" id="carouselDots"></div>
+  </section>
+
+  <section class="latest-section" id="latestSection" style="display:none">
+    <div class="section-eyebrow">Latest</div>
+    <h2 class="section-heading" style="text-align:left; margin-bottom:28px;">From the desk</h2>
+    <div class="posts-grid" id="latestGrid"></div>
+    <div class="view-all-wrap">
+      <span class="view-all" onclick="showPage('blogs')">View all writings <span style="transition:inherit">→</span></span>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div><div class="footer-brand">Titan Coeus</div><p class="footer-tagline">Writing at the intersection of technology, philosophy, and the future.</p></div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Navigate</h4>
+          <a onclick="showPage('home')">Home</a>
+          <a onclick="showPage('blogs')">All Writings</a>
+          <a onclick="showPage('contact')">Contact</a>
+        </div>
+        <div class="footer-col">
+          <h4>Topics</h4>
+          <a>Artificial Intelligence</a><a>Philosophy</a><a>Technology</a><a>Future Studies</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom"><span>© 2025 Titan Coeus.</span><span>Built with clarity of thought.</span></div>
+  </footer>
+</div>
+
+<!-- ══ BLOGS ══ -->
+<div id="blogs" class="page">
+  <div class="blogs-hero">
+    <h1>All Writings</h1>
+    <p>Essays on AI, philosophy, technology, and the nature of intelligence.</p>
+  </div>
+  <div class="blogs-list" id="blogsList"><div class="loading"><div class="spinner"></div></div></div>
+  <div class="pagination" id="pagination"></div>
+  <footer>
+    <div class="footer-inner"><div><div class="footer-brand">Titan Coeus</div><p class="footer-tagline">Writing at the intersection of technology, philosophy, and the future.</p></div></div>
+    <div class="footer-bottom"><span>© 2025 Titan Coeus.</span><span>Built with clarity of thought.</span></div>
+  </footer>
+</div>
+
+<!-- ══ SINGLE POST ══ -->
+<div id="post" class="page">
+  <div class="post-page">
+    <div class="post-back" onclick="history.back(), goBack()">← Back</div>
+    <div class="post-header-tag" id="postTag"></div>
+    <h1 class="post-header-title" id="postTitle"></h1>
+    <div class="post-header-meta" id="postMeta"></div>
+    <div class="post-body" id="postBody"></div>
+  </div>
+  <footer>
+    <div class="footer-inner"><div><div class="footer-brand">Titan Coeus</div></div></div>
+    <div class="footer-bottom"><span>© 2025 Titan Coeus.</span></div>
+  </footer>
+</div>
+
+<!-- ══ CONTACT ══ -->
+<div id="contact" class="page">
+  <div class="contact-section">
+    <h1>Get in touch.</h1>
+    <p>Have a thought to share, a question to ask, or just want to connect?</p>
+    <div class="contact-form">
+      <div class="form-group"><label>Name</label><input type="text" placeholder="Your name"/></div>
+      <div class="form-group"><label>Email</label><input type="email" placeholder="your@email.com"/></div>
+      <div class="form-group"><label>Message</label><textarea placeholder="What's on your mind?"></textarea></div>
+      <button class="submit-btn">Send message</button>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-inner"><div><div class="footer-brand">Titan Coeus</div></div></div>
+    <div class="footer-bottom"><span>© 2025 Titan Coeus.</span></div>
+  </footer>
+</div>
+
+<!-- ══ LOGIN ══ -->
+<div id="login" class="page">
+  <div style="max-width:400px; margin: 0 auto; padding: 140px 32px 80px; text-align:center;">
+    <div style="font-family:var(--serif); font-size:36px; font-weight:700; letter-spacing:-1px; margin-bottom:8px;">Admin</div>
+    <p style="color:var(--mid); font-size:15px; margin-bottom:40px;">Sign in to manage your blog.</p>
+    <div style="display:flex; flex-direction:column; gap:14px; text-align:left;">
+      <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"/></div>
+      <button class="submit-btn" onclick="handleLogin()" style="margin-top:8px;">Sign in</button>
+      <p id="loginError" style="color:#ff3b30; font-size:13px; text-align:center; display:none;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN DASHBOARD ══ -->
+<div id="admin" class="page">
+  <div style="max-width:1100px; margin:0 auto; padding:80px 48px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:48px; padding-top:20px;">
+      <div style="font-family:var(--serif); font-size:32px; font-weight:700; letter-spacing:-1px;">Dashboard</div>
+      <div style="display:flex; gap:16px;">
+        <button onclick="showPage('newpost')" style="background:var(--fg); color:#fff; border:none; padding:10px 22px; border-radius:980px; font-size:14px; font-weight:500; cursor:pointer; font-family:var(--sans);">+ New Essay</button>
+        <button id="logoutBtn" style="background:none; border:1px solid rgba(0,0,0,0.15); padding:10px 22px; border-radius:980px; font-size:14px; cursor:pointer; font-family:var(--sans);">Sign out</button>
+      </div>
+    </div>
+    <div id="adminPostsList"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<!-- ══ NEW / EDIT POST ══ -->
+<div id="newpost" class="page">
+  <div style="max-width:800px; margin:0 auto; padding:80px 48px 120px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; padding-top:20px;">
+      <div style="font-family:var(--serif); font-size:28px; font-weight:700; letter-spacing:-0.8px;" id="editorTitle">New Essay</div>
+      <button onclick="showPage('admin')" style="background:none; border:none; font-size:14px; color:var(--mid); cursor:pointer;">← Back</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <div class="form-group"><label>Title</label><input type="text" id="postTitleInput" placeholder="The Architecture of Intelligence"/></div>
+      <div class="form-group"><label>Short Description</label><input type="text" id="postDescInput" placeholder="A brief description shown in listings..."/></div>
+      <div class="form-group">
+        <label>Category / Tag</label>
+        <input type="text" id="postTagInput" placeholder="AI, Philosophy, Technology..."/>
+      </div>
+      <div class="form-group">
+        <label>Cover Image URL <span style="color:var(--mid); font-weight:400;">(paste any image link)</span></label>
+        <input type="text" id="postImgInput" placeholder="https://images.unsplash.com/..."/>
+      </div>
+      <div class="form-group">
+        <label>Content <span style="color:var(--mid); font-weight:400;">(HTML supported: &lt;p&gt;, &lt;h2&gt;, &lt;h3&gt;, &lt;blockquote&gt;, &lt;img&gt;)</span></label>
+        <textarea id="postContentInput" style="min-height:420px; font-family:monospace; font-size:13px;" placeholder="<p>Your essay begins here...</p>&#10;&#10;<h2>A Subheading</h2>&#10;<p>More content...</p>"></textarea>
+      </div>
+      <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
+        <button onclick="saveDraft()" style="background:none; border:1px solid rgba(0,0,0,0.15); padding:12px 24px; border-radius:980px; font-size:14px; cursor:pointer; font-family:var(--sans);">Save Draft</button>
+        <button onclick="publishPost()" style="background:var(--fg); color:#fff; border:none; padding:12px 28px; border-radius:980px; font-size:14px; font-weight:500; cursor:pointer; font-family:var(--sans);">Publish →</button>
+      </div>
+      <p id="saveMsg" style="text-align:center; font-size:13px; color:var(--mid); display:none;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="config.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc, query, orderBy, limit, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let allPosts = [];
+let carouselIndex = 0;
+let lastViewedPage = 'home';
+let editingPostId = null;
+const PER_PAGE = 20;
+let currentBlogPage = 1;
+
+// ── AUTH STATE ──
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+  const adminLink = document.getElementById('adminNavLink');
+  if (user && user.email === ADMIN_EMAIL) {
+    adminLink.textContent = 'Dashboard';
+    adminLink.onclick = () => showPage('admin');
+  } else {
+    adminLink.textContent = 'Admin';
+    adminLink.onclick = () => showPage('login');
+  }
+});
+
+// ── LOGIN / LOGOUT ──
+const doLogin = async () => {
+  const email = document.getElementById('loginEmail').value;
+  const pass = document.getElementById('loginPassword').value;
+  const err = document.getElementById('loginError');
+  err.style.display = 'none';
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, pass);
+    currentUser = result.user;
+    showPageRaw('admin');
+    loadAdminPanel();
+  } catch(e) {
+    err.textContent = 'Wrong email or password.';
+    err.style.display = 'block';
+  }
+};
+
+const doLogout = async () => {
+  await signOut(auth);
+  showPage('home');
+};
+
+// ── FETCH ALL POSTS ──
+async function fetchPosts(publishedOnly = true) {
+  try {
+    let q;
+    if (publishedOnly) {
+      q = query(collection(db, 'posts'), where('status', '==', 'published'), orderBy('createdAt', 'desc'));
+    } else {
+      q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+    }
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) {
+    console.error(e);
+    return [];
+  }
+}
+
+// ── HOME PAGE LOAD ──
+async function loadHome() {
+  const posts = await fetchPosts(true);
+  allPosts = posts;
+
+  const featuredLoading = document.getElementById('featuredLoading');
+  const featuredPost = document.getElementById('featuredPost');
+  featuredLoading.style.display = 'none';
+
+  if (posts.length === 0) {
+    featuredPost.style.display = 'none';
+    return;
+  }
+
+  // Featured (latest)
+  const f = posts[0];
+  document.getElementById('featuredTitle').textContent = f.title;
+  document.getElementById('featuredDesc').textContent = f.description;
+  if (f.coverImage) document.getElementById('featuredImg').style.backgroundImage = `url('${f.coverImage}')`;
+  featuredPost.style.display = 'block';
+  window._featuredId = f.id;
+
+  // Carousel (next 5)
+  const carouselPosts = posts.slice(1, 6);
+  if (carouselPosts.length > 0) {
+    buildCarousel(carouselPosts);
+    document.getElementById('carouselSection').style.display = 'block';
+  }
+
+  // Latest grid (first 6)
+  const latestPosts = posts.slice(0, 6);
+  buildLatestGrid(latestPosts);
+  document.getElementById('latestSection').style.display = 'block';
+}
+
+window.openFeatured = () => {
+  if (window._featuredId) openPost(window._featuredId);
+};
+
+// ── CAROUSEL ──
+function buildCarousel(posts) {
+  const track = document.getElementById('carouselTrack');
+  const dots = document.getElementById('carouselDots');
+  track.innerHTML = ''; dots.innerHTML = '';
+  carouselIndex = 0;
+
+  posts.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'c-card' + (i === 0 ? ' active' : '');
+    card.onclick = () => { if (i === carouselIndex) openPost(p.id); else goToSlide(i); };
+    card.innerHTML = `
+      <div class="c-img" style="background-image:url('${p.coverImage || ''}'); background-color:#eee;"></div>
+      <div class="c-body">
+        <div class="c-tag">${p.tag || ''}</div>
+        <div class="c-title">${p.title}</div>
+        <div class="c-desc">${p.description || ''}</div>
+      </div>`;
+    track.appendChild(card);
+
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goToSlide(i);
+    dots.appendChild(dot);
+  });
+
+  updateCarousel();
+}
+
+function updateCarousel() {
+  const track = document.getElementById('carouselTrack');
+  const cards = [...track.querySelectorAll('.c-card')];
+  const wrap = document.getElementById('carouselWrap');
+  const cardWidth = 340; const gap = 24;
+  const centerOffset = wrap.offsetWidth / 2 - cardWidth / 2;
+  track.style.transform = `translateX(${centerOffset - carouselIndex * (cardWidth + gap)}px)`;
+  cards.forEach((c, i) => {
+    c.classList.remove('active','near');
+    if (i === carouselIndex) c.classList.add('active');
+    else if (Math.abs(i - carouselIndex) === 1) c.classList.add('near');
+  });
+  document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i === carouselIndex));
+}
+
+window.goToSlide = (i) => { carouselIndex = i; updateCarousel(); };
+window.moveCarousel = (dir) => { const cards = document.querySelectorAll('.c-card'); carouselIndex = Math.max(0, Math.min(carouselIndex + dir, cards.length - 1)); updateCarousel(); };
+window.addEventListener('resize', updateCarousel);
+
+// ── LATEST GRID ──
+function buildLatestGrid(posts) {
+  const grid = document.getElementById('latestGrid');
+  grid.innerHTML = '';
+  posts.forEach(p => {
+    const tile = document.createElement('div');
+    tile.className = 'post-tile';
+    tile.onclick = () => openPost(p.id);
+    tile.innerHTML = `
+      <div class="tile-meta"><span class="tile-tag">${p.tag||''}</span><span class="tile-date">${formatDate(p.createdAt)}</span></div>
+      <div class="tile-title">${p.title}</div>
+      <div class="tile-desc">${p.description||''}</div>
+      <span class="tile-read">Read essay →</span>`;
+    grid.appendChild(tile);
+  });
+}
+
+// ── BLOGS LIST ──
+async function loadBlogsPage(page = 1) {
+  currentBlogPage = page;
+  const list = document.getElementById('blogsList');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const posts = allPosts.length ? allPosts : await fetchPosts(true);
+  allPosts = posts;
+
+  list.innerHTML = '';
+  if (posts.length === 0) { list.innerHTML = '<div class="empty-state">No essays published yet.</div>'; return; }
+
+  const start = (page - 1) * PER_PAGE;
+  const slice = posts.slice(start, start + PER_PAGE);
+
+  slice.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'blog-row';
+    row.onclick = () => openPost(p.id);
+    row.innerHTML = `
+      <div class="blog-num">${String(start + i + 1).padStart(2, '0')}</div>
+      <div>
+        <div class="blog-row-title">${p.title}</div>
+        <div class="blog-row-desc">${p.description||''}</div>
+      </div>
+      <div class="blog-row-tag">${p.tag||''}</div>`;
+    list.appendChild(row);
+  });
+
+  buildPagination(page, Math.ceil(posts.length / PER_PAGE));
+}
+
+function buildPagination(active, total) {
+  const pag = document.getElementById('pagination');
+  pag.innerHTML = '';
+  for (let i = 1; i <= total; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'pg-btn' + (i === active ? ' active' : '');
+    btn.textContent = i;
+    btn.onclick = () => loadBlogsPage(i);
+    pag.appendChild(btn);
+  }
+  if (active < total) {
+    const next = document.createElement('button');
+    next.className = 'pg-btn pg-next';
+    next.textContent = 'Next →';
+    next.onclick = () => loadBlogsPage(active + 1);
+    pag.appendChild(next);
+  }
+}
+
+// ── OPEN SINGLE POST ──
+async function openPost(id) {
+  lastViewedPage = document.querySelector('.page.active')?.id || 'home';
+  showPageRaw('post');
+  document.getElementById('postTitle').textContent = '';
+  document.getElementById('postBody').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  try {
+    const snap = await getDoc(doc(db, 'posts', id));
+    if (!snap.exists()) return;
+    const p = { id: snap.id, ...snap.data() };
+    document.getElementById('postTag').textContent = p.tag || '';
+    document.getElementById('postTitle').textContent = p.title;
+    document.getElementById('postMeta').textContent = `${formatDate(p.createdAt)} · ${readTime(p.content)} min read`;
+    document.getElementById('postBody').innerHTML = p.content || '';
+  } catch(e) { document.getElementById('postBody').innerHTML = '<p>Error loading post.</p>'; }
+}
+
+window.goBack = () => showPage(lastViewedPage);
+
+// ── ADMIN PANEL ──
+async function loadAdminPanel() { window._loadAdminPanel = loadAdminPanel;
+  if (!currentUser || currentUser.email !== ADMIN_EMAIL) { showPage('login'); return; }
+  const posts = await fetchPosts(false);
+  const container = document.getElementById('adminPostsList');
+  container.innerHTML = '';
+
+  if (posts.length === 0) {
+    container.innerHTML = '<div class="empty-state">No essays yet. Write your first one!</div>';
+    return;
+  }
+
+  const table = document.createElement('div');
+  table.style.cssText = 'border:1px solid rgba(0,0,0,0.08); border-radius:14px; overflow:hidden;';
+  posts.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = `display:grid; grid-template-columns:1fr auto auto; gap:24px; align-items:center; padding:20px 24px; background:#fff; ${i > 0 ? 'border-top:1px solid rgba(0,0,0,0.07);' : ''}`;
+    row.innerHTML = `
+      <div>
+        <div style="font-weight:600; font-size:16px; margin-bottom:4px;">${p.title}</div>
+        <div style="font-size:12px; color:var(--mid);">${formatDate(p.createdAt)} · <span style="color:${p.status==='published'?'#30a46c':'#f59e0b'}; font-weight:500;">${p.status||'draft'}</span></div>
+      </div>
+      <button onclick="editPost('${p.id}')" style="background:none; border:1px solid rgba(0,0,0,0.12); padding:8px 18px; border-radius:980px; font-size:13px; cursor:pointer; font-family:var(--sans);">Edit</button>
+      <button onclick="deletePost('${p.id}', this)" style="background:none; border:1px solid #ff3b30; color:#ff3b30; padding:8px 18px; border-radius:980px; font-size:13px; cursor:pointer; font-family:var(--sans);">Delete</button>`;
+    table.appendChild(row);
+  });
+  container.appendChild(table);
+}
+
+// ── EDIT POST ──
+window.editPost = async (id) => {
+  editingPostId = id;
+  const snap = await getDoc(doc(db, 'posts', id));
+  const p = snap.data();
+  document.getElementById('postTitleInput').value = p.title || '';
+  document.getElementById('postDescInput').value = p.description || '';
+  document.getElementById('postTagInput').value = p.tag || '';
+  document.getElementById('postImgInput').value = p.coverImage || '';
+  document.getElementById('postContentInput').value = p.content || '';
+  document.getElementById('editorTitle').textContent = 'Edit Essay';
+  showPageRaw('newpost');
+};
+
+window.deletePost = async (id, btn) => {
+  if (!confirm('Delete this essay? This cannot be undone.')) return;
+  btn.textContent = 'Deleting...';
+  await deleteDoc(doc(db, 'posts', id));
+  allPosts = [];
+  loadAdminPanel();
+};
+
+// ── SAVE / PUBLISH ──
+window.saveDraft = () => savePost('draft');
+window.publishPost = () => savePost('published');
+
+async function savePost(status) {
+  const title = document.getElementById('postTitleInput').value.trim();
+  const description = document.getElementById('postDescInput').value.trim();
+  const tag = document.getElementById('postTagInput').value.trim();
+  const coverImage = document.getElementById('postImgInput').value.trim();
+  const content = document.getElementById('postContentInput').value.trim();
+  const msg = document.getElementById('saveMsg');
+
+  if (!title) { alert('Please add a title.'); return; }
+
+  const data = { title, description, tag, coverImage, content, status, updatedAt: serverTimestamp() };
+
+  try {
+    if (editingPostId) {
+      await updateDoc(doc(db, 'posts', editingPostId), data);
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db, 'posts'), data);
+    }
+    allPosts = [];
+    msg.textContent = status === 'published' ? '✓ Published!' : '✓ Saved as draft.';
+    msg.style.display = 'block';
+    setTimeout(() => {
+      editingPostId = null;
+      clearEditor();
+      showPage('admin');
+    }, 1000);
+  } catch(e) {
+    alert('Error saving: ' + e.message);
+  }
+}
+
+function clearEditor() {
+  ['postTitleInput','postDescInput','postTagInput','postImgInput','postContentInput'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('editorTitle').textContent = 'New Essay';
+  document.getElementById('saveMsg').style.display = 'none';
+  editingPostId = null;
+}
+
+// ── ROUTING ──
+function showPageRaw(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.showPage = (id) => {
+  if (id === 'admin') {
+    if (!currentUser || currentUser.email !== ADMIN_EMAIL) { showPageRaw('login'); return; }
+    showPageRaw('admin');
+    loadAdminPanel();
+    return;
+  }
+  if (id === 'newpost') {
+    clearEditor();
+    showPageRaw('newpost');
+    return;
+  }
+  if (id === 'blogs') {
+    showPageRaw('blogs');
+    loadBlogsPage(currentBlogPage);
+    return;
+  }
+  showPageRaw(id);
+};
+
+// ── HELPERS ──
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+function readTime(html = '') {
+  const words = html.replace(/<[^>]+>/g,'').split(/\s+/).length;
+  return Math.max(1, Math.round(words / 200));
+}
+
+// ── INIT ──
+loadHome();
+document.getElementById("logoutBtn").addEventListener("click", doLogout);
+
+// Fix: module-scoped functions can't be called via onclick attributes
+document.getElementById("loginBtn").addEventListener("click", doLogin);
+document.getElementById('loginPassword').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+
+<script>
+function handleLogin() {
+  var email = document.getElementById('loginEmail').value;
+  var pass = document.getElementById('loginPassword').value;
+  var err = document.getElementById('loginError');
+  var btn = event.target;
+  err.style.display = 'none';
+  btn.textContent = 'Signing in...';
+  btn.disabled = true;
+
+  import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js').then(function(authModule) {
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js').then(function(appModule) {
+      var app;
+      try { app = appModule.getApp(); } catch(e) { app = appModule.initializeApp(FIREBASE_CONFIG); }
+      var auth = authModule.getAuth(app);
+      authModule.signInWithEmailAndPassword(auth, email, pass).then(function(result) {
+        btn.textContent = 'Sign in';
+        btn.disabled = false;
+        document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+        document.getElementById('admin').classList.add('active');
+        window.scrollTo({top: 0});
+        if (window._loadAdminPanel) window._loadAdminPanel();
+      }).catch(function(e) {
+        btn.textContent = 'Sign in';
+        btn.disabled = false;
+        err.textContent = 'Wrong email or password.';
+        err.style.display = 'block';
+      });
+    });
+  });
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('login').classList.contains('active')) {
+    handleLogin();
+  }
+});
+</script>
+</body>
+</html>
